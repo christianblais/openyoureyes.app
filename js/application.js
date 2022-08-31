@@ -12,7 +12,12 @@ function App({quiz}) {
 }
 
 function Welcome({startGame}) {
-    return html`<button onclick=${() => startGame()}>Welcome</button>`
+    return html`
+        <h1>Bienvenue</h1>
+        <p>
+            <button onclick=${() => startGame()}>Débuter!</button>
+        </p>
+    `
 }
 
 function Game({quiz}) {
@@ -31,7 +36,9 @@ function Game({quiz}) {
 }
 
 function Loading() {
-    return "Loading..."
+    return html`
+        <p id="loading">Loading...</p>
+    `
 }
 
 function Question({question, nextQuestion}) {

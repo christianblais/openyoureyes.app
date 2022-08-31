@@ -9,20 +9,22 @@ class Quiz
         return new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject));
     }
 
-    static formatField(wikidataBinding)
+    static parseField(wikidataBinding)
     {
-      switch(wikidataBinding['datatype'])
-      {
-        case "http://www.w3.org/2001/XMLSchema#dateTime":
-          return new Date(wikidataBinding['value']).toLocaleDateString()
-        default:
-          return wikidataBinding['value']
-      }
+        switch(wikidataBinding['datatype'])
+        {
+            case "http://www.w3.org/2001/XMLSchema#dateTime":
+                return new Date(wikidataBinding['value']).toLocaleDateString()
+            default:
+                return wikidataBinding['value']
+        }
     }
 
-    static format(wikidataBindings)
+    static parse(wikidataBindings)
     {
-        return wikidataBindings
+        return Object.entries(wikidataBindings).reduce((entries, entry) => {
+            entries[entry[0]] = this.parseField(entry[1]); return entries
+        }, {})
     }
 
     question()
@@ -35,17 +37,34 @@ class Quiz
             .then(({latitude, longitude}) => category.getQueryString(latitude, longitude))
             .then((queryString) => Wikidata.query(queryString))
             .then((results) => results[0])
-            .then((response) => this.constructor.format(response))
+            .then((response) => this.constructor.parse(response))
+            .then((parsedResponse) => category.createQuestion(parsedResponse))
     }
 }
 
-Quiz.Categories.Area = class {
-    static getQueryString(lat, lon) {
+Quiz.Category = class {
+    static createQuestion(entry)
+    {
+        return {
+            question: this.questionText(entry['placeLabel']),
+            answer: entry['value'],
+            meta: {
+                distance: entry['distance'],
+                latitude: entry['latitude'],
+                longitude: entry['longitude'],
+            }
+        }
+    }
+
+    static getQueryString(lat, lon)
+    {
         return `
             SELECT DISTINCT
                 ?placeLabel
                 ?distance
-                (SAMPLE(?area) as ?area)
+                ?longitude
+                ?latitude
+                (SAMPLE(?value) as ?value)
             WHERE
             {
                 SERVICE wikibase:around {
@@ -56,94 +75,50 @@ Quiz.Categories.Area = class {
                 } .
 
                 ?place wdt:P31 wd:Q27676416 .
-                ?place wdt:P2046 ?area .
+                ?place p:P625 [ psv:P625 [  wikibase:geoLongitude ?longitude ; wikibase:geoLatitude ?latitude ] ].
+                ?place ${this.wikidataID} ?value .
 
                 SERVICE wikibase:label { bd:serviceParam wikibase:language "fr" . }
             }
-            GROUP BY ?placeLabel ?distance
+            GROUP BY ?placeLabel ?distance ?longitude ?latitude
             ORDER BY ?distance LIMIT 1
         `
     }
 }
 
-Quiz.Categories.Demonym = class {
-    static getQueryString(lat, lon) {
-        return `
-            SELECT DISTINCT
-                ?placeLabel
-                ?distance
-                (SAMPLE(?demonym) as ?demonym)
-            WHERE
-            {
-                SERVICE wikibase:around {
-                    ?place wdt:P625 ?location .
-                    bd:serviceParam wikibase:center "Point(${lon},${lat})"^^geo:wktLiteral .
-                    bd:serviceParam wikibase:radius "100" .
-                    bd:serviceParam wikibase:distance ?distance .
-                } .
+Quiz.Categories.Area = class extends Quiz.Category {
+    static wikidataID = "wdt:P2046"
 
-                ?place wdt:P31 wd:Q27676416 .
-                ?place wdt:P1549 ?demonym .
-
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "fr" . }
-            }
-            GROUP BY ?placeLabel ?distance
-            ORDER BY ?distance LIMIT 1
-        `
+    static questionText(placeLabel)
+    {
+        return `Approximativement, sur quelle superficie s'étend la ville de ${placeLabel}?`
     }
 }
 
-Quiz.Categories.Inception = class {
-    static getQueryString(lat, lon) {
-        return `
-            SELECT DISTINCT
-                ?placeLabel
-                ?distance
-                (SAMPLE(?inception) as ?inception)
-            WHERE
-            {
-                SERVICE wikibase:around {
-                    ?place wdt:P625 ?location .
-                    bd:serviceParam wikibase:center "Point(${lon},${lat})"^^geo:wktLiteral .
-                    bd:serviceParam wikibase:radius "100" .
-                    bd:serviceParam wikibase:distance ?distance .
-                } .
+Quiz.Categories.Demonym = class extends Quiz.Category {
+    static wikidataID = "wdt:P1549"
 
-                ?place wdt:P31 wd:Q27676416 .
-                ?place wdt:P571 ?inception .
-
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "fr" . }
-            }
-            GROUP BY ?placeLabel ?distance
-            ORDER BY ?distance LIMIT 1
-        `
+    static questionText(placeLabel)
+    {
+        return `Comment appelle-t'on les habitants de la ville de ${placeLabel}?`
     }
 }
 
-Quiz.Categories.Population = class {
-    static getQueryString(lat, lon) {
-        return `
-            SELECT DISTINCT
-                ?placeLabel
-                ?distance
-                (SAMPLE(?population) as ?population)
-            WHERE
-            {
-                SERVICE wikibase:around {
-                    ?place wdt:P625 ?location .
-                    bd:serviceParam wikibase:center "Point(${lon},${lat})"^^geo:wktLiteral .
-                    bd:serviceParam wikibase:radius "100" .
-                    bd:serviceParam wikibase:distance ?distance .
-                } .
+Quiz.Categories.Inception = class extends Quiz.Category {
+    static wikidataID = "wdt:P571"
 
-                ?place wdt:P31 wd:Q27676416 .
-                ?place wdt:P1082 ?population .
+    static questionText(placeLabel)
+    {
+        return `En quelle année la ville de ${placeLabel} a-t'elle été fondée?`
+    }
+}
 
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "fr" . }
-            }
-            GROUP BY ?placeLabel ?distance
-            ORDER BY ?distance LIMIT 1
-        `
+Quiz.Categories.Population = class extends Quiz.Category {
+    static wikidataID = "wdt:P1082"
+
+    static questionText(placeLabel)
+    {
+        return `Approximativement, combien d'habitants la ville de ${placeLabel} compte-t'elle?`
     }
 }
 
