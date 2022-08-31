@@ -37,7 +37,10 @@ function Game({quiz}) {
 
 function Loading() {
     return html`
-        <p id="loading">Loading...</p>
+        <h1 class="lds-ripple">
+            <div></div>
+            <div></div>
+        </h1>
     `
 }
 
@@ -45,27 +48,42 @@ function Question({question, nextQuestion}) {
     const [answer, setAnswer] = useState(null);
 
     const renderedComponent = answer
-        ? html`<${ShowAnswer} answer=${answer} nextQuestion=${() => nextQuestion()} />`
+        ? html`<${ShowAnswer} question=${question} answer=${answer} nextQuestion=${() => nextQuestion()} />`
         : html`<${AskQuestion} question=${question} setAnswer=${(answer) => setAnswer(answer)} />`
 
-    return renderedComponent
+    return html`
+        <h1>
+            <small><i>${question['category']}</i></small>
+            <br />
+            ${question['place']}
+            <br />
+            <small style="font-size: 0.5em;">
+                ${question['meta']['distance'].toFixed(2)}km • ${question['meta']['latitude'].toFixed(2)}°,${question['meta']['longitude'].toFixed(2)}°
+            </small>
+        </h1>
+        ${renderedComponent}
+    `
 }
 
 function AskQuestion({question, setAnswer}) {
     return html`
-        <div>
-            Question: ${JSON.stringify(question)}
-            <button onclick=${() => setAnswer(1)}>Answer</button>
-        </div>
+        <p>
+            ${question['question']}
+        </p>
+        <footer>
+            <button onclick=${() => setAnswer(question['answer'])}>Réponse</button>
+        </footer>
     `;
 }
 
-function ShowAnswer({answer, nextQuestion}) {
+function ShowAnswer({question, answer, nextQuestion}) {
     return html`
-        <div>
-            Answer: ${JSON.stringify(answer)}
-            <button onclick=${() => nextQuestion()}>Next</button>
-        </div>
+        <p>
+            ${answer}
+        </p>
+        <footer>
+            <button onclick=${() => nextQuestion()}>Question suivante</button>
+        </footer>
     `;
 }
 
