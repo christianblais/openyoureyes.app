@@ -14,6 +14,9 @@ class Quiz
         if (wikidataBinding['datatype'] == "http://www.w3.org/2001/XMLSchema#dateTime")
             return new Date(wikidataBinding['value']).toLocaleDateString()
 
+        if (wikidataBinding['datatype'] == "http://www.w3.org/2001/XMLSchema#decimal")
+            return parseFloat(wikidataBinding['value'])
+
         if (wikidataBinding['value'].startsWith("http://www.wikidata.org/entity/"))
             return `wd:${wikidataBinding['value'].split('/').slice(-1)}`
             
@@ -54,7 +57,7 @@ Quiz.Category = class {
             place: entry['placeLabel'],
             question: this.questionText(entry['placeLabel']),
             category: this.category,
-            answer: entry['value'],
+            answer: this.answerText(entry['value']),
             meta: {
                 distance: parseFloat(entry['distance']),
                 latitude:  parseFloat(entry['latitude']),
@@ -110,6 +113,11 @@ Quiz.Categories.Area = class extends Quiz.Category {
     {
         return `Approximativement, sur quelle superficie s'étend la ville de ${placeLabel}?`
     }
+
+    static answerText(answer)
+    {
+        return `${Math.round(answer)}km²`
+    }
 }
 
 Quiz.Categories.Demonym = class extends Quiz.Category {
@@ -120,6 +128,11 @@ Quiz.Categories.Demonym = class extends Quiz.Category {
     static questionText(placeLabel)
     {
         return `Comment appelle-t'on les habitants de la ville de ${placeLabel}?`
+    }
+
+    static answerText(answer)
+    {
+        return answer
     }
 }
 
@@ -132,6 +145,11 @@ Quiz.Categories.Inception = class extends Quiz.Category {
     {
         return `En quelle année la ville de ${placeLabel} a-t'elle été fondée?`
     }
+
+    static answerText(answer)
+    {
+        return new Date(answer).getFullYear()
+    }
 }
 
 Quiz.Categories.Population = class extends Quiz.Category {
@@ -142,6 +160,11 @@ Quiz.Categories.Population = class extends Quiz.Category {
     static questionText(placeLabel)
     {
         return `Approximativement, combien d'habitants la ville de ${placeLabel} compte-t'elle?`
+    }
+
+    static answerText(answer)
+    {
+        return `Environ ${(Math.round(answer / 1000) * 1000).toLocaleString()}`
     }
 }
 

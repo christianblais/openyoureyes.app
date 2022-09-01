@@ -2,18 +2,30 @@ import { html, render, useState, useEffect } from 'https://unpkg.com/htm/preact/
 import Quiz from './quiz.js'
 
 function App({quiz}) {
-    const [started, setStarted] = useState(false);
+    const [started, setStarted] = useState(true);
 
     const renderedComponent = started
         ? html`<${Game} quiz=${quiz} />`
         : html`<${Welcome} startGame=${() => setStarted(true)} />`
 
-    return renderedComponent
+    return html`
+        <main>
+            ${renderedComponent}
+        </main>
+        <footer>
+            <small>Made with ❤️ by <a href="https://github.com/christianblais/" target="_blank">Christian Blais</a></small>
+        </footer>
+    `
 }
 
 function Welcome({startGame}) {
     return html`
-        <h1>Bienvenue</h1>
+        <h1>Géoquiz</h1>
+        <p>
+            Né de mon désir d'en connaître davantage sur le monde,
+            Géoquiz est un jeu éducatif se servant de votre géolocalisation
+            pour poser des questions ce qui vous entoure.
+        </p>
         <p>
             <button onclick=${() => startGame()}>Débuter!</button>
         </p>
@@ -37,10 +49,11 @@ function Game({quiz}) {
 
 function Loading() {
     return html`
-        <h1 class="lds-ripple">
+        <h1>Loading…</h1>
+        <p class="lds-ripple">
             <div></div>
             <div></div>
-        </h1>
+        </p>
     `
 }
 
@@ -53,11 +66,9 @@ function Question({question, nextQuestion}) {
 
     return html`
         <h1>
-            <small><i>${question['category']}</i></small>
-            <br />
             ${question['place']}
             <br />
-            <small style="font-size: 0.5em;">
+            <small style="font-size: 0.4em;">
                 ${question['meta']['distance'].toFixed(2)}km • ${question['meta']['latitude'].toFixed(2)}°,${question['meta']['longitude'].toFixed(2)}°
             </small>
         </h1>
@@ -68,22 +79,28 @@ function Question({question, nextQuestion}) {
 function AskQuestion({question, setAnswer}) {
     return html`
         <p>
-            ${question['question']}
+            <small>${question['category']}</small>
         </p>
-        <footer>
+        <h4>
+            ${question['question']}
+        </h4>
+        <p>
             <button onclick=${() => setAnswer(question['answer'])}>Réponse</button>
-        </footer>
+        </p>
     `;
 }
 
 function ShowAnswer({question, answer, nextQuestion}) {
     return html`
         <p>
-            ${answer}
+            <small>Réponse</small>
         </p>
-        <footer>
+        <h4>
+            ${answer}
+        </h4>
+        <p>
             <button onclick=${() => nextQuestion()}>Question suivante</button>
-        </footer>
+        </p>
     `;
 }
 

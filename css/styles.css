@@ -1,14 +1,13 @@
 body {
     text-align: center;
-    margin: 10px;
 }
 
 .lds-ripple {
     display: inline-block;
     position: relative;
-    width: 100px;
-    height: 100px;
-    margin-top: 150px;
+    width: 84px;
+    height: 84px;
+    margin-top: 100px;
 }
 
 .lds-ripple div {
