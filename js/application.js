@@ -27,7 +27,7 @@ function Welcome({startGame}) {
             <button onclick=${() => startGame()}>Débuter!</button>
         </p>
         <footer>
-            <small>Made with ❤️ by <a href="https://github.com/christianblais/" target="_blank">Christian Blais</a></small>
+            <small>Fait avec ❤️ par <a href="https://github.com/christianblais/" target="_blank">Christian Blais</a></small>
         </footer>
     `
 }
@@ -49,7 +49,7 @@ function Game({quiz}) {
 
 function Loading() {
     return html`
-        <h1>Loading…</h1>
+        <h1>Chargement…</h1>
         <p class="lds-ripple">
             <div></div>
             <div></div>
@@ -62,7 +62,7 @@ function Question({question, nextQuestion}) {
 
     const renderedComponent = answer
         ? html`<${ShowAnswer} question=${question} answer=${answer} nextQuestion=${() => nextQuestion()} />`
-        : html`<${AskQuestion} question=${question} setAnswer=${(answer) => setAnswer(answer)} />`
+        : html`<${AskQuestion} question=${question} setUserChoice=${(answer) => setAnswer(answer)} />`
 
     return html`
         <h1>
@@ -76,7 +76,14 @@ function Question({question, nextQuestion}) {
     `
 }
 
-function AskQuestion({question, setAnswer}) {
+function AskQuestion({question, setUserChoice}) {
+    let buttons = [];
+
+    if (question['choices'].length)
+        question['choices'].forEach((choice) => buttons.push([choice, choice]))
+    else
+        buttons.push([question['answer'], 'Dévoiler'])
+
     return html`
         <p>
             <small>${question['category']}</small>
@@ -85,21 +92,43 @@ function AskQuestion({question, setAnswer}) {
             ${question['question']}
         </h4>
         <p>
-            <button onclick=${() => setAnswer(question['answer'])}>Réponse</button>
+            ${buttons.map(([choice, text]) => html`<button style="width: 200px" onclick=${() => setUserChoice(choice)}>${text}</button><br />`)}
         </p>
     `;
 }
 
 function ShowAnswer({question, answer, nextQuestion}) {
+    let color;
+    let text;
+
+    if (question['choices'].length)
+    {
+        if (question['answer'] == answer)
+        {
+            color = "#588c7e"
+            text = "Bravo!"
+        }
+        else
+        {
+            color = "#d96459"
+            text = "Oops!"
+        }
+    }
+    else
+    {
+        color = 'inherit'
+        text = "Réponse"
+    }
+
     return html`
         <p>
-            <small>Réponse</small>
+            <small>${text}</small>
         </p>
-        <h4>
-            ${answer}
-        </h4>
+        <h3 style="color: ${color}">
+            ${question['answer']}
+        </h3>
         <p>
-            <button onclick=${() => nextQuestion()}>Question suivante</button>
+            <button onclick=${() => nextQuestion()}>Prochaine question</button>
         </p>
     `;
 }

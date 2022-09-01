@@ -58,6 +58,7 @@ Quiz.Category = class {
             question: this.questionText(entry['placeLabel']),
             category: this.category,
             answer: this.answerText(entry['value']),
+            choices: this.choices(entry['value']),
             meta: {
                 distance: parseFloat(entry['distance']),
                 latitude:  parseFloat(entry['latitude']),
@@ -118,6 +119,23 @@ Quiz.Categories.Area = class extends Quiz.Category {
     {
         return `${Math.round(answer)}km²`
     }
+
+    static choices(answer)
+    {
+        let choices;
+
+        switch (Math.floor(Math.random() * 3))
+        {
+            case 0:
+                choices = [answer * 0.6, answer * 0.8, answer]; break
+            case 1:
+                choices = [answer * 0.8, answer, answer * 1.2]; break
+            case 2:
+                choices = [answer, answer * 1.2, answer * 1.4]; break
+        }
+
+        return choices.map((choice) => this.answerText(choice))
+    }
 }
 
 Quiz.Categories.Demonym = class extends Quiz.Category {
@@ -133,6 +151,11 @@ Quiz.Categories.Demonym = class extends Quiz.Category {
     static answerText(answer)
     {
         return answer
+    }
+
+    static choices(answer)
+    {
+        return []
     }
 }
 
@@ -150,6 +173,21 @@ Quiz.Categories.Inception = class extends Quiz.Category {
     {
         return new Date(answer).getFullYear()
     }
+
+    static choices(answer)
+    {
+        let year = this.answerText(answer)
+
+        switch (Math.floor(Math.random() * 3))
+        {
+            case 0:
+                return [year - 20, year - 10, year]
+            case 1:
+                return [year - 10, year, year + 10]
+            case 2:
+                return [year, year + 10, year + 20]
+        }
+    }
 }
 
 Quiz.Categories.Population = class extends Quiz.Category {
@@ -165,6 +203,23 @@ Quiz.Categories.Population = class extends Quiz.Category {
     static answerText(answer)
     {
         return `Environ ${(Math.round(answer / 1000) * 1000).toLocaleString()}`
+    }
+
+    static choices(answer)
+    {
+        let choices;
+
+        switch (Math.floor(Math.random() * 3))
+        {
+            case 0:
+                choices = [answer * 0.6, answer * 0.8, answer]; break
+            case 1:
+                choices = [answer * 0.8, answer, answer * 1.2]; break
+            case 2:
+                choices = [answer, answer * 1.2, answer * 1.4]; break
+        }
+
+        return choices.map((choice) => this.answerText(choice))
     }
 }
 
