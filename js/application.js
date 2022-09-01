@@ -2,7 +2,7 @@ import { html, render, useState, useEffect } from 'https://unpkg.com/htm/preact/
 import Quiz from './quiz.js'
 
 function App({quiz}) {
-    const [started, setStarted] = useState(true);
+    const [started, setStarted] = useState(false);
 
     const renderedComponent = started
         ? html`<${Game} quiz=${quiz} />`
@@ -12,9 +12,6 @@ function App({quiz}) {
         <main>
             ${renderedComponent}
         </main>
-        <footer>
-            <small>Made with ❤️ by <a href="https://github.com/christianblais/" target="_blank">Christian Blais</a></small>
-        </footer>
     `
 }
 
@@ -29,6 +26,9 @@ function Welcome({startGame}) {
         <p>
             <button onclick=${() => startGame()}>Débuter!</button>
         </p>
+        <footer>
+            <small>Made with ❤️ by <a href="https://github.com/christianblais/" target="_blank">Christian Blais</a></small>
+        </footer>
     `
 }
 
