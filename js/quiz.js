@@ -4,6 +4,23 @@ class Quiz
 {
     static Categories = {}
 
+    static hydrate(data)
+    {
+        if (!data)
+            return null;
+
+        Object.entries(data).forEach(([category, questions]) => {
+            this.Categories[category].memoryStore = questions
+        })
+    }
+
+    static serialize()
+    {
+        return Object.entries(this.Categories).reduce((data, [name, category]) => {
+            data[name] = category.memoryStore; return data
+        }, {})
+    }
+
     static getCurrentPosition()
     {
         return new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject));
@@ -30,17 +47,17 @@ class Quiz
         }, {})
     }
 
-    async question()
+    static async question()
     {
         let categories = Object.entries(Quiz.Categories)
         let category = categories[Math.floor(Math.random() * categories.length)][1]
 
-        let question = await this.constructor.getCurrentPosition()
+        let question = await this.getCurrentPosition()
             .then((geolocation) => geolocation.coords)
             .then(({latitude, longitude}) => category.getQueryString(latitude, longitude))
             .then((queryString) => Wikidata.query(queryString))
             .then((results) => results[0])
-            .then((response) => this.constructor.parse(response))
+            .then((response) => this.parse(response))
             .then((parsedResponse) => category.createQuestion(parsedResponse))
         
         category.memorizeQuestion(question)

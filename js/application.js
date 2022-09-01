@@ -1,11 +1,11 @@
 import { html, render, useState, useEffect } from 'https://unpkg.com/htm/preact/standalone.module.js'
 import Quiz from './quiz.js'
 
-function App({quiz}) {
+function App() {
     const [started, setStarted] = useState(false);
 
     const renderedComponent = started
-        ? html`<${Game} quiz=${quiz} />`
+        ? html`<${Game} />`
         : html`<${Welcome} startGame=${() => setStarted(true)} />`
 
     return html`
@@ -32,12 +32,12 @@ function Welcome({startGame}) {
     `
 }
 
-function Game({quiz}) {
+function Game() {
     const [question, setQuestion] = useState(null);
 
     useEffect(() => {
         if (!question)
-            quiz.question().then((question) => setQuestion(question))
+            Quiz.question().then((question) => setQuestion(question))
     }, [question]);
 
     const renderedComponent = question
@@ -133,4 +133,7 @@ function ShowAnswer({question, answer, nextQuestion}) {
     `;
 }
 
-render(html`<${App} quiz=${new Quiz()} />`, document.body);
+Quiz.hydrate(JSON.parse(localStorage.getItem('quiz')))
+window.onbeforeunload = () => localStorage.setItem('quiz', JSON.stringify(Quiz.serialize()))
+
+render(html`<${App} />`, document.body);
