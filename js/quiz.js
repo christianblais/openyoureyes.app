@@ -2,7 +2,7 @@ import Wikidata from './wikidata.js'
 
 class Quiz
 {
-    static Categories = {}
+    static Questions = {}
 
     static hydrate(data)
     {
@@ -10,13 +10,13 @@ class Quiz
             return null;
 
         Object.entries(data).forEach(([category, questions]) => {
-            this.Categories[category].memoryStore = questions
+            this.Questions[category].memoryStore = questions
         })
     }
 
     static serialize()
     {
-        return Object.entries(this.Categories).reduce((data, [name, category]) => {
+        return Object.entries(this.Questions).reduce((data, [name, category]) => {
             data[name] = category.memoryStore; return data
         }, {})
     }
@@ -47,10 +47,14 @@ class Quiz
         }, {})
     }
 
-    static async question()
+    static question()
     {
-        let categories = Object.entries(Quiz.Categories)
-        let category = categories[Math.floor(Math.random() * categories.length)][1]
+        return this.questionInCategories(Object.values(Quiz.Questions))
+    }
+
+    static async questionInCategories(categories)
+    {
+        let category = categories[Math.floor(Math.random() * categories.length)]
 
         let question = await this.getCurrentPosition()
             .then((geolocation) => geolocation.coords)
@@ -59,6 +63,10 @@ class Quiz
             .then((results) => results[0])
             .then((response) => this.parse(response))
             .then((parsedResponse) => category.createQuestion(parsedResponse))
+            .catch(() => {
+                // let's assume we can't find any item for this one specific category
+                return this.questionInCategories(categories.filter((x) => x !== category))
+            })
         
         category.memorizeQuestion(question)
 
@@ -66,7 +74,7 @@ class Quiz
     }
 }
 
-Quiz.Category = class {
+class Question {
     static createQuestion(entry)
     {
         return {
@@ -74,8 +82,8 @@ Quiz.Category = class {
             place: entry['placeLabel'],
             question: this.questionText(entry['placeLabel']),
             category: this.category,
-            answer: this.answerText(entry['value']),
-            choices: this.choices(entry['value']),
+            answer: this.answerText(entry['valueLabel']),
+            choices: this.choices(entry['valueLabel']),
             meta: {
                 distance: parseFloat(entry['distance']),
                 latitude:  parseFloat(entry['latitude']),
@@ -98,7 +106,7 @@ Quiz.Category = class {
                 ?distance
                 ?longitude
                 ?latitude
-                (SAMPLE(?value) as ?value)
+                ?valueLabel
             WHERE
             {
                 SERVICE wikibase:around {
@@ -108,21 +116,53 @@ Quiz.Category = class {
                     bd:serviceParam wikibase:distance ?distance .
                 } .
 
-                ?place wdt:P31 wd:Q27676416 .
-                ?place p:P625 [ psv:P625 [  wikibase:geoLongitude ?longitude ; wikibase:geoLatitude ?latitude ] ].
+                ?place ${this.wikidataInheritanceType == 'strict' ? 'wdt:P31' : 'wdt:P31/wdt:P279*'} ${this.wikidataTypeId} .
+                ?place p:P625 [ psv:P625 [ wikibase:geoLongitude ?longitude ; wikibase:geoLatitude ?latitude ] ] .
                 ?place ${this.wikidataID} ?value .
 
                 FILTER ( ?place not in ( ${this.memoryStore.join(', ')} ) ) .
 
                 SERVICE wikibase:label { bd:serviceParam wikibase:language "fr" . }
             }
-            GROUP BY ?place ?placeLabel ?distance ?longitude ?latitude
+            GROUP BY ?place ?placeLabel ?distance ?longitude ?latitude ?valueLabel
             ORDER BY ?distance LIMIT 1
         `
     }
 }
 
-Quiz.Categories.Area = class extends Quiz.Category {
+
+Question.CityOrTown = class extends Question {
+    static wikidataInheritanceType = 'strict'
+    static wikidataTypeId = "wd:Q27676416"
+}
+
+Question.PointOfInterest = class extends Question {
+    static wikidataInheritanceType = 'lax'
+    static wikidataTypeId = "wd:Q960648"
+}
+
+Quiz.Questions.Architect = class extends Question.PointOfInterest {
+    static memoryStore = []
+    static wikidataID = "wdt:P84"
+    static category = "Architectes"
+
+    static questionText(placeLabel)
+    {
+        return `Quel est le nom de l'architecte à l'origine du ${placeLabel}?`
+    }
+
+    static answerText(answer)
+    {
+        return answer
+    }
+
+    static choices(answer)
+    {
+        return []
+    }
+}
+
+Quiz.Questions.Area = class extends Question.CityOrTown {
     static memoryStore = []
     static wikidataID = "wdt:P2046"
     static category = "Géographie"
@@ -134,7 +174,7 @@ Quiz.Categories.Area = class extends Quiz.Category {
 
     static answerText(answer)
     {
-        return `${Math.round(answer)}km²`
+        return `${Math.round(answer)} km²`
     }
 
     static choices(answer)
@@ -155,7 +195,7 @@ Quiz.Categories.Area = class extends Quiz.Category {
     }
 }
 
-Quiz.Categories.Demonym = class extends Quiz.Category {
+Quiz.Questions.Demonym = class extends Question.CityOrTown {
     static memoryStore = []
     static wikidataID = "wdt:P1549"
     static category = "Gentilés"
@@ -176,14 +216,14 @@ Quiz.Categories.Demonym = class extends Quiz.Category {
     }
 }
 
-Quiz.Categories.Inception = class extends Quiz.Category {
+Quiz.Questions.Inception = class extends Question.CityOrTown {
     static memoryStore = []
     static wikidataID = "wdt:P571"
     static category = "Histoire"
 
     static questionText(placeLabel)
     {
-        return `En quelle année la ville de ${placeLabel} a-t'elle été fondée?`
+        return `En quelle année la ville de ${placeLabel} a-t-elle été fondée?`
     }
 
     static answerText(answer)
@@ -207,7 +247,7 @@ Quiz.Categories.Inception = class extends Quiz.Category {
     }
 }
 
-Quiz.Categories.Population = class extends Quiz.Category {
+Quiz.Questions.Population = class extends Question.CityOrTown {
     static memoryStore = []
     static wikidataID = "wdt:P1082"
     static category = "Population"
@@ -219,7 +259,7 @@ Quiz.Categories.Population = class extends Quiz.Category {
 
     static answerText(answer)
     {
-        return `Environ ${(Math.round(answer / 1000) * 1000).toLocaleString()}`
+        return (Math.round(answer / 1000) * 1000).toLocaleString()
     }
 
     static choices(answer)

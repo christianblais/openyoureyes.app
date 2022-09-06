@@ -69,7 +69,7 @@ function Question({question, nextQuestion}) {
             ${question['place']}
             <br />
             <small style="font-size: 0.4em;">
-                ${question['meta']['distance'].toFixed(2)}km • ${question['meta']['latitude'].toFixed(2)}°,${question['meta']['longitude'].toFixed(2)}°
+                ${question['meta']['distance'].toFixed(2)}km • ${question['meta']['latitude'].toFixed(2)}°, ${question['meta']['longitude'].toFixed(2)}°
             </small>
         </h1>
         ${renderedComponent}
