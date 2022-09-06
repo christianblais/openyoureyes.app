@@ -77,6 +77,18 @@ function Question({question, nextQuestion}) {
 }
 
 function AskQuestion({question, setUserChoice}) {
+    useEffect(() => {
+        let voice = window.speechSynthesis.getVoices().find((v) => v.lang == "fr-CA");
+        if (!voice) return;
+
+        var msg = new SpeechSynthesisUtterance();
+        msg.voice = voice;
+        msg.text = question.question;
+        msg.lang = 'fr-CA'
+        
+        window.speechSynthesis.speak(msg);
+    }, [question]);
+    
     let buttons = [];
 
     if (question.choices.length)
