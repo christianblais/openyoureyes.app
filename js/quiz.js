@@ -62,9 +62,8 @@ class Quiz
             .then((queryString) => Wikidata.query(queryString))
             .then((results) => results[0])
             .then((response) => this.parse(response))
-            .then((parsedResponse) => category.createQuestion(parsedResponse))
+            .then((parsedResponse) => new category(parsedResponse))
             .catch(() => {
-                // let's assume we can't find any item for this one specific category
                 return this.questionInCategories(categories.filter((x) => x !== category))
             })
         
@@ -75,26 +74,22 @@ class Quiz
 }
 
 class Question {
-    static createQuestion(entry)
+    constructor(entry)
     {
-        return {
-            id: entry['place'],
-            place: entry['placeLabel'],
-            question: this.questionText(entry['placeLabel']),
-            category: this.category,
-            answer: this.answerText(entry['valueLabel']),
-            choices: this.choices(entry['valueLabel']),
-            meta: {
-                distance: parseFloat(entry['distance']),
-                latitude:  parseFloat(entry['latitude']),
-                longitude:  parseFloat(entry['longitude']),
-            }
-        }
+        this.id = entry['place']
+        this.place = entry['placeLabel']
+        this.question = this.constructor.questionText(entry['placeLabel'])
+        this.category = this.constructor.category
+        this.answer = this.constructor.answerText(entry['valueLabel'])
+        this.choices = this.constructor.choices(entry['valueLabel'])
+        this.distance = parseFloat(entry['distance'])
+        this.latitude = parseFloat(entry['latitude'])
+        this.longitude =  parseFloat(entry['longitude'])
     }
 
     static memorizeQuestion(question)
     {
-        this.memoryStore.push(question['id'])
+        this.memoryStore.push(question.id)
     }
 
     static getQueryString(lat, lon)
@@ -130,7 +125,6 @@ class Question {
     }
 }
 
-
 Question.CityOrTown = class extends Question {
     static wikidataInheritanceType = 'strict'
     static wikidataTypeId = "wd:Q27676416"
@@ -141,7 +135,7 @@ Question.PointOfInterest = class extends Question {
     static wikidataTypeId = "wd:Q960648"
 }
 
-Quiz.Questions.Architect = class extends Question.PointOfInterest {
+Quiz.Questions['PointOfInterest.Architect'] = class extends Question.PointOfInterest {
     static memoryStore = []
     static wikidataID = "wdt:P84"
     static category = "Architectes"
@@ -162,7 +156,38 @@ Quiz.Questions.Architect = class extends Question.PointOfInterest {
     }
 }
 
-Quiz.Questions.Area = class extends Question.CityOrTown {
+Quiz.Questions['PointOfInterest.DateOfOfficialOpening'] = class extends Question.PointOfInterest {
+    static memoryStore = []
+    static wikidataID = "wdt:P1619"
+    static category = "Histoire"
+
+    static questionText(placeLabel)
+    {
+        return `En quelle année est-ce que le ${placeLabel} a-t-il été ouvert au public pour la première fois?`
+    }
+
+    static answerText(answer)
+    {
+        return new Date(answer).getFullYear()
+    }
+
+    static choices(answer)
+    {
+        let year = this.answerText(answer)
+
+        switch (Math.floor(Math.random() * 3))
+        {
+            case 0:
+                return [year - 20, year - 10, year]
+            case 1:
+                return [year - 10, year, year + 10]
+            case 2:
+                return [year, year + 10, year + 20]
+        }
+    }
+}
+
+Quiz.Questions['CityOrTown.Area'] = class extends Question.CityOrTown {
     static memoryStore = []
     static wikidataID = "wdt:P2046"
     static category = "Géographie"
@@ -195,14 +220,14 @@ Quiz.Questions.Area = class extends Question.CityOrTown {
     }
 }
 
-Quiz.Questions.Demonym = class extends Question.CityOrTown {
+Quiz.Questions['CityOrTown.Demonym'] = class extends Question.CityOrTown {
     static memoryStore = []
     static wikidataID = "wdt:P1549"
     static category = "Gentilés"
 
     static questionText(placeLabel)
     {
-        return `Comment appelle-t'on les habitants de la ville de ${placeLabel}?`
+        return `Comment appelle-t-on les habitants de la ville de ${placeLabel}?`
     }
 
     static answerText(answer)
@@ -216,7 +241,7 @@ Quiz.Questions.Demonym = class extends Question.CityOrTown {
     }
 }
 
-Quiz.Questions.Inception = class extends Question.CityOrTown {
+Quiz.Questions['CityOrTown.Inception'] = class extends Question.CityOrTown {
     static memoryStore = []
     static wikidataID = "wdt:P571"
     static category = "Histoire"
@@ -247,7 +272,7 @@ Quiz.Questions.Inception = class extends Question.CityOrTown {
     }
 }
 
-Quiz.Questions.Population = class extends Question.CityOrTown {
+Quiz.Questions['CityOrTown.Population'] = class extends Question.CityOrTown {
     static memoryStore = []
     static wikidataID = "wdt:P1082"
     static category = "Population"

@@ -66,10 +66,10 @@ function Question({question, nextQuestion}) {
 
     return html`
         <h1>
-            ${question['place']}
+            ${question.place}
             <br />
             <small style="font-size: 0.4em;">
-                ${question['meta']['distance'].toFixed(2)}km • ${question['meta']['latitude'].toFixed(2)}°, ${question['meta']['longitude'].toFixed(2)}°
+                ${question.distance.toFixed(2)}km • ${question.latitude.toFixed(2)}°, ${question.longitude.toFixed(2)}°
             </small>
         </h1>
         ${renderedComponent}
@@ -79,17 +79,17 @@ function Question({question, nextQuestion}) {
 function AskQuestion({question, setUserChoice}) {
     let buttons = [];
 
-    if (question['choices'].length)
-        question['choices'].forEach((choice) => buttons.push([choice, choice]))
+    if (question.choices.length)
+        question.choices.forEach((choice) => buttons.push([choice, choice]))
     else
-        buttons.push([question['answer'], 'Dévoiler'])
+        buttons.push([question.answer, 'Dévoiler'])
 
     return html`
         <p>
-            <small>${question['category']}</small>
+            <small>${question.category}</small>
         </p>
         <h4>
-            ${question['question']}
+            ${question.question}
         </h4>
         <p>
             ${buttons.map(([choice, text]) => html`<button style="width: 200px" onclick=${() => setUserChoice(choice)}>${text}</button><br />`)}
