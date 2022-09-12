@@ -4,10 +4,17 @@ class Quiz
 {
     static Questions = {}
 
-    static hydrate(data)
+    static clear()
     {
+        window.localStorage.removeItem('quiz')
+    }
+
+    static hydrate()
+    {
+        let data = JSON.parse(window.localStorage.getItem('quiz'))
+
         if (!data)
-            return null;
+            return null
 
         Object.entries(data).forEach(([category, questions]) => {
             this.Questions[category].memoryStore = questions
@@ -16,9 +23,11 @@ class Quiz
 
     static serialize()
     {
-        return Object.entries(this.Questions).reduce((data, [name, category]) => {
+        let data = Object.entries(this.Questions).reduce((data, [name, category]) => {
             data[name] = category.memoryStore; return data
         }, {})
+
+        window.localStorage.setItem('quiz', JSON.stringify(data))
     }
 
     static getCurrentPosition()
@@ -85,6 +94,8 @@ class Question {
         this.distance = parseFloat(entry['distance'])
         this.latitude = parseFloat(entry['latitude'])
         this.longitude =  parseFloat(entry['longitude'])
+        this.currentLatitude = parseFloat(entry['currentLatitude'])
+        this.currentLongitude =  parseFloat(entry['currentLongitude'])
     }
 
     static memorizeQuestion(question)
@@ -101,9 +112,14 @@ class Question {
                 ?distance
                 ?longitude
                 ?latitude
+                ?currentLongitude
+                ?currentLatitude
                 ?valueLabel
             WHERE
             {
+                BIND(${lon} as ?currentLongitude)
+                BIND(${lat} as ?currentLatitude)
+
                 SERVICE wikibase:around {
                     ?place wdt:P625 ?location .
                     bd:serviceParam wikibase:center "Point(${lon},${lat})"^^geo:wktLiteral .
@@ -119,7 +135,7 @@ class Question {
 
                 SERVICE wikibase:label { bd:serviceParam wikibase:language "fr" . }
             }
-            GROUP BY ?place ?placeLabel ?distance ?longitude ?latitude ?valueLabel
+            GROUP BY ?place ?placeLabel ?distance ?longitude ?latitude ?currentLongitude ?currentLatitude ?valueLabel
             ORDER BY ?distance LIMIT 1
         `
     }

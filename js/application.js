@@ -2,6 +2,11 @@ import { html, render, useState, useEffect } from 'https://unpkg.com/htm/preact/
 import Quiz from './quiz.js'
 
 function App() {
+    useEffect(() => {
+        Quiz.hydrate();
+        window.onbeforeunload = () => Quiz.serialize();
+    }, [])
+
     const [started, setStarted] = useState(false);
 
     const renderedComponent = started
@@ -50,10 +55,30 @@ function Game() {
 function Loading() {
     return html`
         <h1>Chargement…</h1>
-        <p class="lds-ripple">
-            <div></div>
-            <div></div>
-        </p>
+    `
+}
+
+function Map({origin, place}) {
+    useEffect(() => {
+        mapboxgl.accessToken = 'pk.eyJ1IjoiY2hyaXN0aWFuYmxhaXMiLCJhIjoiY2w3dW0xb3h2MDMxOTNvbnh4OXdkdWh1ZiJ9.aoPWChBJh4_nk1PU20H41Q';
+
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11', // style URL
+            projection: 'globe',
+            bounds: [place, origin],
+            fitBoundsOptions: { padding: { top: 10, right: 10, bottom: 10, left: 10 } }
+        });
+
+        new mapboxgl.Marker({ "color": "#000000" }).setLngLat(origin).addTo(map);
+        new mapboxgl.Marker({ "color": "#FFFFFF" }).setLngLat(place).addTo(map);
+        map.scrollZoom.disable();
+    }, [])
+
+    return html`
+        <div style="width: 100%; height: 100px; position: relative;">
+            <div id="map" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;"></div>
+        </div>
     `
 }
 
@@ -65,13 +90,11 @@ function Question({question, nextQuestion}) {
         : html`<${AskQuestion} question=${question} setUserChoice=${(answer) => setAnswer(answer)} />`
 
     return html`
-        <h1>
-            ${question.place}
-            <br />
-            <small style="font-size: 0.4em;">
-                ${question.distance.toFixed(2)}km • ${question.latitude.toFixed(2)}°, ${question.longitude.toFixed(2)}°
-            </small>
-        </h1>
+        <h1>${question.place}</h1>
+        <${Map} origin=${[question.currentLongitude, question.currentLatitude]} place=${[question.longitude, question.latitude]} />
+        <small style="font-size: 0.4em;">
+            ${question.distance.toFixed(2)}km • ${question.latitude.toFixed(2)}°, ${question.longitude.toFixed(2)}°
+        </small>
         ${renderedComponent}
     `
 }
@@ -86,7 +109,7 @@ function AskQuestion({question, setUserChoice}) {
         msg.text = question.question;
         msg.lang = 'fr-CA'
         
-        window.speechSynthesis.speak(msg);
+        // window.speechSynthesis.speak(msg);
     }, [question]);
     
     let buttons = [];
@@ -145,7 +168,4 @@ function ShowAnswer({question, answer, nextQuestion}) {
     `;
 }
 
-Quiz.hydrate(JSON.parse(localStorage.getItem('quiz')))
-window.onbeforeunload = () => localStorage.setItem('quiz', JSON.stringify(Quiz.serialize()))
-
-render(html`<${App} />`, document.body);
+render(html`<${App} />`, document.body)
