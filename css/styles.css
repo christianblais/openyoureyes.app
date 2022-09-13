@@ -1,13 +1,24 @@
+:root {
+    --color-accent: #4F98E3;
+    --color-subdue: #B3D4F5;
+    --color-background: #F2F7FD;
+}
+
+.theme-gold {
+    --color-accent: #9E7810;
+    --color-subdue: #f3d686;
+    --color-background: #f9ebc7;
+}
+
 body {
     font-family: Verdana, Arial, Helvetica, sans-serif;
     text-align: center;
-    background: #F2F7FD;
-    color: #4F98E3;
+    background: var(--color-background);
+    color: var(--color-accent);
     margin: 0;
     padding: 0;
     font-size: 1.1em;
 }
-
 
 p, h1 {
     width: 90%;
@@ -20,14 +31,14 @@ h1 {
 }
 
 small {
-    color: #B3D4F5;
+    color: var(--color-subdue);
 }
 
 button {
     display: block;
     padding: 12px;
-    color: #F2F7FD;
-    background-color: #4F98E3;
+    color: var(--color-background);
+    background-color: var(--color-accent);
     border-width: 0;
     border-radius: 16px;
     width: 90%;
@@ -46,7 +57,7 @@ button {
     transform: translateY(-50%);
     width: 80%;
     margin: 0 10%;
-    background: #F2F7FD;
+    background: var(--color-background);
     border-radius: 16px;
 }
 
@@ -60,4 +71,56 @@ button {
     left: 0;
     background: rgba(0, 0, 0, 0.5);
     z-index: 999;
+}
+
+.lds-ripple {
+    display: inline-block;
+    position: absolute;
+    top: 50%;
+    width: 80px;
+    height: 80px;
+    margin: -40px 0 0 -40px;
+}
+
+.lds-ripple div {
+    position: absolute;
+    border: 4px solid var(--color-accent);
+    opacity: 1;
+    border-radius: 50%;
+    animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+.lds-ripple div:nth-child(2) {
+    animation-delay: -0.5s;
+}
+
+@keyframes lds-ripple {
+    0% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 0;
+    }
+    4.9% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 0;
+    }
+    5% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    100% {
+        top: 0px;
+        left: 0px;
+        width: 72px;
+        height: 72px;
+        opacity: 0;
+    }
 }

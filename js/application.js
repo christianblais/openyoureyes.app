@@ -2,7 +2,7 @@ import { html, render, useState, useEffect } from 'https://unpkg.com/htm/preact/
 import Quiz from './quiz.js'
 
 function App() {
-    const [started, setStarted] = useState(true)
+    const [started, setStarted] = useState(false)
 
     const renderedComponent = started
         ? html`<${Game} />`
@@ -17,13 +17,13 @@ function Welcome({startGame}) {
         <p>
             Né de mon désir d'en connaître davantage sur le monde,
             Géoquiz est un jeu éducatif se servant de votre géolocalisation
-            pour poser des questions ce qui vous entoure.
+            pour poser des questions sur ce qui vous entoure.
         </p>
         <p>
             <button onclick=${() => startGame()}>Débuter!</button>
         </p>
         <footer>
-            <small>Fait avec ❤️ par <a href="https://github.com/christianblais/" target="_blank">Christian Blais</a></small>
+            <small>Fait avec ❤️ par <a href="https://christianblais.dev" target="_blank">Christian Blais</a></small>
         </footer>
     `
 }
@@ -43,7 +43,7 @@ function Game() {
 }
 
 function Loading() {
-    return "..."
+    return html`<div class="lds-ripple"><div></div><div></div></div>`
 }
 
 function Map({question}) {
