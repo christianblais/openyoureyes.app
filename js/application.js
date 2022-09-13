@@ -146,7 +146,6 @@ function Answer({question, answer, nextQuestion}) {
     `
 }
 
-Quiz.clear();
 window.onbeforeunload = () => Quiz.serialize();
 Quiz.hydrate();
 
