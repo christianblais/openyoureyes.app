@@ -2,22 +2,17 @@ import { html, render, useState, useEffect } from 'https://unpkg.com/htm/preact/
 import Quiz from './quiz.js'
 
 function App() {
-    useEffect(() => {
-        Quiz.hydrate();
-        window.onbeforeunload = () => Quiz.serialize();
-    }, [])
+    window.onbeforeunload = () => Quiz.serialize();
 
-    const [started, setStarted] = useState(false);
+    Quiz.hydrate();
+
+    const [started, setStarted] = useState(true);
 
     const renderedComponent = started
         ? html`<${Game} />`
         : html`<${Welcome} startGame=${() => setStarted(true)} />`
 
-    return html`
-        <main>
-            ${renderedComponent}
-        </main>
-    `
+    return renderedComponent
 }
 
 function Welcome({startGame}) {
@@ -38,18 +33,34 @@ function Welcome({startGame}) {
 }
 
 function Game() {
-    const [question, setQuestion] = useState(null);
+    const [question, setQuestion] = useState(null)
+    const [map, setMap] = useState(null)
 
     useEffect(() => {
         if (!question)
             Quiz.question().then((question) => setQuestion(question))
     }, [question]);
 
+    useEffect(() => {
+        setMap(
+            new mapboxgl.Map({
+                container: 'map-content',
+                style: 'mapbox://styles/christianblais/cl7zh5oe9003m14moxjd77r4r',
+                projection: 'globe',
+                scrollZoom: false,
+                zoom: 10
+            })
+        )
+    }, [])
+
     const renderedComponent = question
         ? html`<${Question} question=${question} nextQuestion=${() => setQuestion(null)} />`
         : html`<${Loading} />`
 
-    return renderedComponent
+    return html`
+        <${Map} map=${map} question=${question} />
+        ${renderedComponent}
+    `
 }
 
 function Loading() {
@@ -58,26 +69,16 @@ function Loading() {
     `
 }
 
-function Map({origin, place}) {
+function Map({map, question}) {
     useEffect(() => {
-        mapboxgl.accessToken = 'pk.eyJ1IjoiY2hyaXN0aWFuYmxhaXMiLCJhIjoiY2w3dW0xb3h2MDMxOTNvbnh4OXdkdWh1ZiJ9.aoPWChBJh4_nk1PU20H41Q';
-
-        const map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v11', // style URL
-            projection: 'globe',
-            bounds: [place, origin],
-            fitBoundsOptions: { padding: { top: 10, right: 10, bottom: 10, left: 10 } }
-        });
-
-        new mapboxgl.Marker({ "color": "#000000" }).setLngLat(origin).addTo(map);
-        new mapboxgl.Marker({ "color": "#FFFFFF" }).setLngLat(place).addTo(map);
-        map.scrollZoom.disable();
-    }, [])
+        if (map && question)
+            map.panTo([question.longitude, question.latitude], { duration: 2000 });
+    }, [question])
 
     return html`
-        <div style="width: 100%; height: 100px; position: relative;">
-            <div id="map" style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;"></div>
+        <div id="map-wrapper">
+            <div id="map-content"></div>
+            <div id="map-overlay"></div>
         </div>
     `
 }
@@ -91,16 +92,15 @@ function Question({question, nextQuestion}) {
 
     return html`
         <h1>${question.place}</h1>
-        <${Map} origin=${[question.currentLongitude, question.currentLatitude]} place=${[question.longitude, question.latitude]} />
-        <small style="font-size: 0.4em;">
-            ${question.distance.toFixed(2)}km • ${question.latitude.toFixed(2)}°, ${question.longitude.toFixed(2)}°
-        </small>
         ${renderedComponent}
     `
 }
 
 function AskQuestion({question, setUserChoice}) {
     useEffect(() => {
+        // experimental feature, disabled by default
+        return
+
         let voice = window.speechSynthesis.getVoices().find((v) => v.lang == "fr-CA");
         if (!voice) return;
 
@@ -109,7 +109,7 @@ function AskQuestion({question, setUserChoice}) {
         msg.text = question.question;
         msg.lang = 'fr-CA'
         
-        // window.speechSynthesis.speak(msg);
+        window.speechSynthesis.speak(msg);
     }, [question]);
     
     let buttons = [];

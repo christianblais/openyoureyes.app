@@ -179,7 +179,7 @@ Quiz.Questions['PointOfInterest.DateOfOfficialOpening'] = class extends Question
 
     static questionText(placeLabel)
     {
-        return `En quelle année est-ce que le ${placeLabel} a-t-il été ouvert au public pour la première fois?`
+        return `En quelle année est-ce que cet établissement a-t-il été ouvert au public pour la première fois?`
     }
 
     static answerText(answer)
