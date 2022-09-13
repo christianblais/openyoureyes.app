@@ -90,7 +90,7 @@ class Question {
         this.question = this.constructor.questionText(entry['placeLabel'])
         this.category = this.constructor.category
         this.answer = this.constructor.answerText(entry['valueLabel'])
-        this.choices = this.constructor.choices(entry['valueLabel'])
+        this.choices = [...new Set(this.constructor.choices(entry['valueLabel']))]
         this.distance = parseFloat(entry['distance'])
         this.latitude = parseFloat(entry['latitude'])
         this.longitude =  parseFloat(entry['longitude'])
@@ -158,7 +158,7 @@ Quiz.Questions['PointOfInterest.Architect'] = class extends Question.PointOfInte
 
     static questionText(placeLabel)
     {
-        return `Quel est le nom de l'architecte à l'origine du ${placeLabel}?`
+        return `Quel est le nom de l'architecte à l'origine de cet établissement?`
     }
 
     static answerText(answer)

@@ -1,30 +1,63 @@
 body {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
     text-align: center;
-    background: #5d7089;
+    background: #F2F7FD;
+    color: #4F98E3;
+    margin: 0;
+    padding: 0;
+    font-size: 1.1em;
 }
 
-#map-wrapper {
-    z-index: -1;
+
+p, h1 {
+    width: 90%;
+    margin: 24px auto;
+}
+
+h1 {
+    text-transform: capitalize;
+    font-size: 1.5em;
+}
+
+small {
+    color: #B3D4F5;
+}
+
+button {
+    display: block;
+    padding: 12px;
+    color: #F2F7FD;
+    background-color: #4F98E3;
+    border-width: 0;
+    border-radius: 16px;
+    width: 90%;
+    margin: 0 auto 16px auto;
+    font-size: 1.2em;
+}
+
+#map {
+    width: 100%;
+    height: 180px;
+}
+
+.card {
     position: absolute;
-    pointer-events: none;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 80%;
+    margin: 0 10%;
+    background: #F2F7FD;
+    border-radius: 16px;
 }
 
-#map-content {
+#overlay {
+    position: absolute;
     width: 100%;
     height: 100%;
-}
-
-#map-overlay {
-    width: 100%;
-    height: 100%;
-    position: absolute;
     top: 0;
     bottom: 0;
-    left: 0;
     right: 0;
-    background-color: rgba(0,0,0,0.5);
+    left: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
 }
