@@ -1,4 +1,5 @@
 import Wikidata from './wikidata.js'
+import { Text, locale } from './i18n.js'
 
 class Quiz
 {
@@ -103,6 +104,11 @@ class Question {
         this.memoryStore.push(question.id)
     }
 
+    static questionText(placeLabel)
+    {
+        return Text(`questions.${this.category}`, { placeLabel: placeLabel })
+    }
+
     static getQueryString(lat, lon)
     {
         return `
@@ -133,7 +139,7 @@ class Question {
 
                 FILTER ( ?place not in ( ${this.memoryStore.join(', ')} ) ) .
 
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "fr" . }
+                SERVICE wikibase:label { bd:serviceParam wikibase:language "${locale}" . }
             }
             GROUP BY ?place ?placeLabel ?distance ?longitude ?latitude ?currentLongitude ?currentLatitude ?valueLabel
             ORDER BY ?distance LIMIT 1
@@ -151,174 +157,148 @@ Question.PointOfInterest = class extends Question {
     static wikidataTypeId = "wd:Q960648"
 }
 
-Quiz.Questions['PointOfInterest.Architect'] = class extends Question.PointOfInterest {
-    static memoryStore = []
-    static wikidataID = "wdt:P84"
-    static category = "Architectes"
+let QuestionTypes = [
+    class extends Question.PointOfInterest {
+        static memoryStore = []
+        static wikidataID = "wdt:P84"
+        static category = "PointOfInterest.Architect"
 
-    static questionText(placeLabel)
-    {
-        return `Quel est le nom de l'architecte à l'origine de cet établissement?`
-    }
-
-    static answerText(answer)
-    {
-        return answer
-    }
-
-    static choices(answer)
-    {
-        return []
-    }
-}
-
-Quiz.Questions['PointOfInterest.DateOfOfficialOpening'] = class extends Question.PointOfInterest {
-    static memoryStore = []
-    static wikidataID = "wdt:P1619"
-    static category = "Histoire"
-
-    static questionText(placeLabel)
-    {
-        return `En quelle année est-ce que cet établissement a-t-il été ouvert au public pour la première fois?`
-    }
-
-    static answerText(answer)
-    {
-        return new Date(answer).getFullYear()
-    }
-
-    static choices(answer)
-    {
-        let year = this.answerText(answer)
-
-        switch (Math.floor(Math.random() * 3))
+        static answerText(answer)
         {
-            case 0:
-                return [year - 20, year - 10, year]
-            case 1:
-                return [year - 10, year, year + 10]
-            case 2:
-                return [year, year + 10, year + 20]
-        }
-    }
-}
-
-Quiz.Questions['CityOrTown.Area'] = class extends Question.CityOrTown {
-    static memoryStore = []
-    static wikidataID = "wdt:P2046"
-    static category = "Géographie"
-
-    static questionText(placeLabel)
-    {
-        return `Approximativement, sur quelle superficie s'étend la ville de ${placeLabel}?`
-    }
-
-    static answerText(answer)
-    {
-        return `${Math.round(answer)} km²`
-    }
-
-    static choices(answer)
-    {
-        let choices;
-
-        switch (Math.floor(Math.random() * 3))
-        {
-            case 0:
-                choices = [answer * 0.6, answer * 0.8, answer]; break
-            case 1:
-                choices = [answer * 0.8, answer, answer * 1.2]; break
-            case 2:
-                choices = [answer, answer * 1.2, answer * 1.4]; break
+            return answer
         }
 
-        return choices.map((choice) => this.answerText(choice))
-    }
-}
-
-Quiz.Questions['CityOrTown.Demonym'] = class extends Question.CityOrTown {
-    static memoryStore = []
-    static wikidataID = "wdt:P1549"
-    static category = "Gentilés"
-
-    static questionText(placeLabel)
-    {
-        return `Comment appelle-t-on les habitants de la ville de ${placeLabel}?`
-    }
-
-    static answerText(answer)
-    {
-        return answer
-    }
-
-    static choices(answer)
-    {
-        return []
-    }
-}
-
-Quiz.Questions['CityOrTown.Inception'] = class extends Question.CityOrTown {
-    static memoryStore = []
-    static wikidataID = "wdt:P571"
-    static category = "Histoire"
-
-    static questionText(placeLabel)
-    {
-        return `En quelle année la ville de ${placeLabel} a-t-elle été fondée?`
-    }
-
-    static answerText(answer)
-    {
-        return new Date(answer).getFullYear()
-    }
-
-    static choices(answer)
-    {
-        let year = this.answerText(answer)
-
-        switch (Math.floor(Math.random() * 3))
+        static choices(_)
         {
-            case 0:
-                return [year - 20, year - 10, year]
-            case 1:
-                return [year - 10, year, year + 10]
-            case 2:
-                return [year, year + 10, year + 20]
+            return []
+        }
+    },
+
+    class extends Question.PointOfInterest {
+        static memoryStore = []
+        static wikidataID = "wdt:P1619"
+        static category = "PointOfInterest.DateOfOfficialOpening"
+    
+        static answerText(answer)
+        {
+            return new Date(answer).getFullYear()
+        }
+    
+        static choices(answer)
+        {
+            let year = this.answerText(answer)
+    
+            switch (Math.floor(Math.random() * 3))
+            {
+                case 0:
+                    return [year - 20, year - 10, year]
+                case 1:
+                    return [year - 10, year, year + 10]
+                case 2:
+                    return [year, year + 10, year + 20]
+            }
+        }
+    },
+
+    class extends Question.CityOrTown {
+        static memoryStore = []
+        static wikidataID = "wdt:P2046"
+        static category = 'CityOrTown.Area'
+    
+        static answerText(answer)
+        {
+            return `${Math.round(answer)} km²`
+        }
+    
+        static choices(answer)
+        {
+            let choices;
+    
+            switch (Math.floor(Math.random() * 3))
+            {
+                case 0:
+                    choices = [answer * 0.6, answer * 0.8, answer]; break
+                case 1:
+                    choices = [answer * 0.8, answer, answer * 1.2]; break
+                case 2:
+                    choices = [answer, answer * 1.2, answer * 1.4]; break
+            }
+    
+            return choices.map((choice) => this.answerText(choice))
+        }
+    },
+
+    class extends Question.CityOrTown {
+        static memoryStore = []
+        static wikidataID = "wdt:P1549"
+        static category = 'CityOrTown.Demonym'
+    
+        static answerText(answer)
+        {
+            return answer
+        }
+    
+        static choices(answer)
+        {
+            return []
+        }
+    },
+
+    class extends Question.CityOrTown {
+        static memoryStore = []
+        static wikidataID = "wdt:P571"
+        static category = 'CityOrTown.Inception'
+    
+        static answerText(answer)
+        {
+            return new Date(answer).getFullYear()
+        }
+    
+        static choices(answer)
+        {
+            let year = this.answerText(answer)
+    
+            switch (Math.floor(Math.random() * 3))
+            {
+                case 0:
+                    return [year - 20, year - 10, year]
+                case 1:
+                    return [year - 10, year, year + 10]
+                case 2:
+                    return [year, year + 10, year + 20]
+            }
+        }
+    },
+
+    class extends Question.CityOrTown {
+        static memoryStore = []
+        static wikidataID = "wdt:P1082"
+        static category = 'CityOrTown.Population'
+    
+        static answerText(answer)
+        {
+            return (Math.round(answer / 1000) * 1000).toLocaleString()
+        }
+    
+        static choices(answer)
+        {
+            let choices;
+    
+            switch (Math.floor(Math.random() * 3))
+            {
+                case 0:
+                    choices = [answer * 0.6, answer * 0.8, answer]; break
+                case 1:
+                    choices = [answer * 0.8, answer, answer * 1.2]; break
+                case 2:
+                    choices = [answer, answer * 1.2, answer * 1.4]; break
+            }
+    
+            return choices.map((choice) => this.answerText(choice))
         }
     }
-}
+]
 
-Quiz.Questions['CityOrTown.Population'] = class extends Question.CityOrTown {
-    static memoryStore = []
-    static wikidataID = "wdt:P1082"
-    static category = "Population"
-
-    static questionText(placeLabel)
-    {
-        return `Approximativement, combien d'habitants la ville de ${placeLabel} compte-t'elle?`
-    }
-
-    static answerText(answer)
-    {
-        return (Math.round(answer / 1000) * 1000).toLocaleString()
-    }
-
-    static choices(answer)
-    {
-        let choices;
-
-        switch (Math.floor(Math.random() * 3))
-        {
-            case 0:
-                choices = [answer * 0.6, answer * 0.8, answer]; break
-            case 1:
-                choices = [answer * 0.8, answer, answer * 1.2]; break
-            case 2:
-                choices = [answer, answer * 1.2, answer * 1.4]; break
-        }
-
-        return choices.map((choice) => this.answerText(choice))
-    }
-}
+QuestionTypes.forEach((question) => Quiz.Questions[question.category] = question)
 
 export default Quiz

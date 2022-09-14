@@ -57,6 +57,7 @@ button {
     top: 50%;
     transform: translateY(-50%);
     width: 80%;
+    max-width: 1000px;
     margin: 0 10%;
     background: var(--color-background);
     border-radius: 16px;

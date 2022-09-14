@@ -1,5 +1,6 @@
 import { html, render, useState, useEffect } from 'https://unpkg.com/htm/preact/standalone.module.js'
 import Quiz from './quiz.js'
+import { Text } from './i18n.js'
 
 function App() {
     const [started, setStarted] = useState(false)
@@ -13,17 +14,13 @@ function App() {
 
 function Welcome({startGame}) {
     return html`
-        <h1>Ouvre tes yeux!</h1>
+        <h1>${Text('welcome.title')}</h1>
+        <p>${Text('welcome.description')}</p>
         <p>
-            Né de mon désir d'en connaître davantage sur le monde,
-            Ouvre tes yeux! est un jeu éducatif se servant de votre géolocalisation
-            pour poser des questions sur ce qui vous entoure.
-        </p>
-        <p>
-            <button onclick=${() => startGame()}>Débuter!</button>
+            <button onclick=${() => startGame()}>${Text('welcome.action')}</button>
         </p>
         <footer>
-            <small>Fait avec ❤️ par <a href="https://christianblais.dev" target="_blank">Christian Blais</a></small>
+            <small>${Text('welcome.notice')} <a href="https://christianblais.dev" target="_blank">Christian Blais</a></small>
         </footer>
     `
 }
@@ -64,10 +61,10 @@ function Map({question}) {
 
     useEffect(() => {
         if (map) {
-            map.panTo([question.longitude, question.latitude], { duration: 2000 });
+            map.panTo([question.longitude, question.latitude], { duration: 2000 })
 
             if (marker)
-                marker.remove();
+                marker.remove()
 
             setMarker(
                 new mapboxgl.Marker()
@@ -94,10 +91,6 @@ function Question({...props}) {
         setLoading(false)
     }
 
-    function setUserChoice(choice) {
-        setAnswer(choice)
-    }
-
     function coordinates(value) {
         return (Math.round(value * 100) / 100).toFixed(2)
     }
@@ -105,7 +98,7 @@ function Question({...props}) {
     if (question.choices.length)
         question.choices.forEach((choice) => buttons.push([choice, choice]))
     else
-        buttons.push([question.answer, 'Dévoiler'])
+        buttons.push([question.answer, Text(`question.showAnswer`)])
 
     return html`
         <${LoadingQuestion} loading=${loading} />
@@ -117,7 +110,7 @@ function Question({...props}) {
         
         <small>${coordinates(question.latitude)}°, ${coordinates(question.longitude)}°</small>
         <p>${question.question}</p>
-        ${buttons.map(([choice, text]) => html`<button onclick=${() => setUserChoice(choice)}>${text}</button>`)}
+        ${buttons.map(([choice, text]) => html`<button onclick=${() => setAnswer(choice)}>${text}</button>`)}
     `
 }
 
@@ -132,26 +125,26 @@ function Answer({question, answer, nextQuestion}) {
 
     useEffect(() => {
         if (answer)
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'smooth' })
     }, [answer])
 
     const title = 
         question.choices.length
-            ? question.answer == answer ? "Bravo!" : "Oops!"
-            : "Réponse"
+            ? question.answer == answer ? Text('answer.bravo') : Text('answer.oops')
+            : Text('answer.neutral')
 
     return html`
         <div id="overlay">
             <div class="card">
                 <p>${title}</p>
                 <h1>${question.answer}</h1>
-                <button onclick=${() => nextQuestion()}>Prochaine question</button>
+                <button onclick=${() => nextQuestion()}>${Text('question.next')}</button>
             </div>
         </div>
     `
 }
 
-window.onbeforeunload = () => Quiz.serialize();
-Quiz.hydrate();
+window.onbeforeunload = () => Quiz.serialize()
+Quiz.hydrate()
 
 render(html`<${App} />`, document.body)
