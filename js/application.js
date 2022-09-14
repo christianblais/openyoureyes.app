@@ -13,10 +13,10 @@ function App() {
 
 function Welcome({startGame}) {
     return html`
-        <h1>Géoquiz</h1>
+        <h1>Ouvre tes yeux!</h1>
         <p>
             Né de mon désir d'en connaître davantage sur le monde,
-            Géoquiz est un jeu éducatif se servant de votre géolocalisation
+            Ouvre tes yeux! est un jeu éducatif se servant de votre géolocalisation
             pour poser des questions sur ce qui vous entoure.
         </p>
         <p>
@@ -129,6 +129,11 @@ function LoadingQuestion({loading}) {
 
 function Answer({question, answer, nextQuestion}) {
     if (!answer) return
+
+    useEffect(() => {
+        if (answer)
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [answer])
 
     const title = 
         question.choices.length
