@@ -27,6 +27,11 @@ export default {
             Demonym: `Comment appelle-t-on les habitants de la ville de {{placeLabel}}?`,
             Inception: `En quelle année la ville de {{placeLabel}} a-t-elle été fondée?`,
             Population: `Approximativement, combien d'habitants la ville de {{placeLabel}} compte-t'elle?`
+        },
+        Mountain: {
+            MadeFromMaterial: `De quel matériel cette montagne est-elle principalement composée?`,
+            Elevation: `Approximativement, jusqu'à quelle hauteur s'élève cette montagne?`,
+            MountainRange: `De quelle chaîne de montagne cette montagne fait-elle partie?`,
         }
     }
 }

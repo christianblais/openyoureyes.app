@@ -73,7 +73,8 @@ class Quiz
             .then((results) => results[0])
             .then((response) => this.parse(response))
             .then((parsedResponse) => new category(parsedResponse))
-            .catch(() => {
+            .catch((error) => {
+                console.error(error)
                 return this.questionInCategories(categories.filter((x) => x !== category))
             })
         
@@ -157,7 +158,72 @@ Question.PointOfInterest = class extends Question {
     static wikidataTypeId = "wd:Q960648"
 }
 
+Question.Mountain = class extends Question {
+    static wikidataInheritanceType = 'lax'
+    static wikidataTypeId = "wd:Q8502"
+}
+
 let QuestionTypes = [
+    class extends Question.Mountain {
+        static memoryStore = []
+        static wikidataID = "wdt:P186"
+        static category = 'Mountain.MadeFromMaterial'
+
+        static answerText(answer)
+        {
+            return answer
+        }
+
+        static choices(answer)
+        {
+            return []
+        }
+    },
+
+    class extends Question.Mountain {
+        static memoryStore = []
+        static wikidataID = "wdt:P2044"
+        static category = 'Mountain.Elevation'
+
+        static answerText(answer)
+        {
+            return `${Math.round(answer)}m`
+        }
+
+        static choices(answer)
+        {
+            let choices;
+
+            switch (Math.floor(Math.random() * 3))
+            {
+                case 0:
+                    choices = [answer * 0.6, answer * 0.8, answer]; break
+                case 1:
+                    choices = [answer * 0.8, answer, answer * 1.2]; break
+                case 2:
+                    choices = [answer, answer * 1.2, answer * 1.4]; break
+            }
+
+            return choices.map((choice) => this.answerText(choice))
+        }
+    },
+
+    class extends Question.Mountain {
+        static memoryStore = []
+        static wikidataID = "wdt:P4552"
+        static category = 'Mountain.MountainRange'
+
+        static answerText(answer)
+        {
+            return answer
+        }
+
+        static choices(answer)
+        {
+            return []
+        }
+    },
+
     class extends Question.PointOfInterest {
         static memoryStore = []
         static wikidataID = "wdt:P84"
