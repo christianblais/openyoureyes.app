@@ -8,6 +8,6 @@ Open Your Eyes! is a small travel companion that will help you learn more about 
 
 ## Try it out
 
-EN - [https://openyoureyes.app](openyoureyes.app)
+EN - [openyoureyes.app](https://openyoureyes.app)
 
-FR - [https://ouvretesyeux.app](ouvretesyeux.app)
+FR - [ouvretesyeux.app](https://ouvretesyeux.app)
