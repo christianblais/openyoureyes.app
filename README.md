@@ -11,3 +11,9 @@ Open Your Eyes! is a small travel companion that will help you learn more about 
 EN - [openyoureyes.app](https://openyoureyes.app)
 
 FR - [ouvretesyeux.app](https://ouvretesyeux.app)
+
+## How to contribute
+
+This is a statically developped JS app. Download, open index.html, and hack away. No build tools required.
+
+_Note: The mapbox API key only works on our two official domains._
