@@ -1,4 +1,7 @@
 export default {
+    menu: {
+        source: "Voir le code source",
+    },
     welcome: {
         title: "Ouvre Tes Yeux!",
         description:

@@ -1,6 +1,6 @@
 import { html, render, useState, useEffect } from 'https://unpkg.com/htm/preact/standalone.module.js'
 import Quiz from './quiz.js'
-import { Text } from './i18n.js'
+import { Text, locale } from './i18n.js'
 
 function App() {
     const [started, setStarted] = useState(false)
@@ -9,7 +9,31 @@ function App() {
         ? html`<${Game} />`
         : html`<${Welcome} startGame=${() => setStarted(true)} />`
 
-    return renderedComponent
+    const localeLink = locale == "en"
+        ? html`<a href="https://ouvretesyeux.app">Version française</a>`
+        : html`<a href="https://openyoureyes.app">English version</a>`
+
+    return html`
+        <header>
+            <nav role="navigation">
+                <div id="menu-toggle">
+                    <input type="checkbox" />
+
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                    <div id="menu">
+                        ${localeLink}
+                        <br />
+                        <a href="https://github.com/christianblais/openyoureyes.app">${Text('menu.source')}</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        ${renderedComponent}
+    `
 }
 
 function Welcome({startGame}) {
@@ -103,12 +127,13 @@ function Question({...props}) {
     return html`
         <${LoadingQuestion} loading=${loading} />
         <${Answer} question=${question} answer=${answer} nextQuestion=${() => nextQuestion()} />
-    
-        <h1>${question.place}</h1>
-        
+
         <${Map} question=${question} />
         
         <small>${coordinates(question.latitude)}°, ${coordinates(question.longitude)}°</small>
+
+        <h1>${question.place}</h1>
+
         <p>${question.question}</p>
         ${buttons.map(([choice, text]) => html`<button onclick=${() => setAnswer(choice)}>${text}</button>`)}
     `

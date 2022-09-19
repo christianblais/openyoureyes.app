@@ -1,4 +1,7 @@
 export default {
+    menu: {
+        source: "View source",
+    },
     welcome: {
         title: "Open Your Eyes!",
         description:
