@@ -1,4 +1,8 @@
 export default {
+    menu: {
+        clearHistory: "Clear history",
+        viewSource: "View source",
+    },
     welcome: {
         title: "Open Your Eyes!",
         description:

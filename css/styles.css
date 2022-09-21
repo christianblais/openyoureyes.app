@@ -125,3 +125,50 @@ button {
         opacity: 0;
     }
 }
+
+header {
+    min-height: 48px;
+    overflow: hidden;
+}
+
+#menu {
+    position: relative;
+}
+
+#menu #menu-icon {
+    border-radius: 8px;
+    border: 1px solid var(--color-accent);
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+}
+
+#menu input {
+    display: block;
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    cursor: pointer;
+    opacity: 0;
+    z-index: 2;
+}
+
+#menu #menu-slider {
+    display: none;
+    padding: 48px 8px 8px 8px;
+    margin: 0;
+    list-style: none;
+    text-align: left;
+}
+
+#menu #menu-slider li {
+    margin-bottom: 8px;
+}
+
+
+#menu input:checked ~ #menu-slider {
+    display: block;
+}

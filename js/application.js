@@ -1,6 +1,6 @@
 import { html, render, useState, useEffect } from 'https://unpkg.com/htm/preact/standalone.module.js'
 import Quiz from './quiz.js'
-import { Text } from './i18n.js'
+import { Text, locale } from './i18n.js'
 
 function App() {
     const [started, setStarted] = useState(false)
@@ -77,6 +77,35 @@ function Map({question}) {
     return html`<div id="map"></div>`
 }
 
+function Menu() {
+    function clearHistory() {
+        Quiz.clear()
+        window.location.reload()
+    }
+
+    const localeLink = locale == "en"
+        ? html`<a href="https://ouvretesyeux.app">Version française</a>`
+        : html`<a href="https://openyoureyes.app">English version</a>`
+    
+    return html`
+        <header>
+            <div id="menu">
+                <input type="checkbox" />
+                
+                <div id="menu-icon">
+                    ☰
+                </div>
+
+                <ul id="menu-slider">
+                    <li><a href="#" onclick=${() => clearHistory()}>${Text('menu.clearHistory')}</a></li>
+                    <li><a href="https://github.com/christianblais/openyoureyes.app">${Text('menu.viewSource')} ⧉</a></li>
+                    <li>${localeLink}</li>
+                </ul>
+            </div>
+        </header>
+    `
+}
+
 function Question({...props}) {
     const [question, setQuestion] = useState(props.question)
     const [loading, setLoading] = useState(false)
@@ -101,14 +130,16 @@ function Question({...props}) {
         buttons.push([question.answer, Text(`question.showAnswer`)])
 
     return html`
+        <${Menu} />
+        
         <${LoadingQuestion} loading=${loading} />
         <${Answer} question=${question} answer=${answer} nextQuestion=${() => nextQuestion()} />
-    
-        <h1>${question.place}</h1>
         
         <${Map} question=${question} />
-        
         <small>${coordinates(question.latitude)}°, ${coordinates(question.longitude)}°</small>
+
+        <h1>${question.place}</h1>
+
         <p>${question.question}</p>
         ${buttons.map(([choice, text]) => html`<button onclick=${() => setAnswer(choice)}>${text}</button>`)}
     `

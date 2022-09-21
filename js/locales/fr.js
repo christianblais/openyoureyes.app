@@ -1,4 +1,8 @@
 export default {
+    menu: {
+        clearHistory: "Effacer l'historique",
+        viewSource: "Voir le code source",
+    },
     welcome: {
         title: "Ouvre Tes Yeux!",
         description:
